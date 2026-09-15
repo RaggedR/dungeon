@@ -1,0 +1,88 @@
+\usepackage{etoolbox}
+\usepackage{amsmath,amssymb,latexsym}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{enumitem}
+
+% tables: shrink and give them room to breathe
+\AtBeginEnvironment{longtable}{\footnotesize}
+\renewcommand{\arraystretch}{1.18}
+
+% maze diagrams and goal charts are 97 columns wide
+\AtBeginEnvironment{verbatim}{\small}
+\makeatletter
+\def\@verbatim@font{\small\ttfamily}
+\makeatother
+
+% headings
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{2.2ex plus 1ex}{1.1ex}
+
+\setlength{\emergencystretch}{3em}
+
+
+% ---- blue callout box --------------------------------------------------
+\usepackage[most]{tcolorbox}
+\definecolor{bbframe}{HTML}{2C5AA0}
+\definecolor{bbback}{HTML}{EEF3FB}
+\newtcolorbox{bluebox}{
+  colback=bbback, colframe=bbframe, coltitle=bbframe,
+  boxrule=0.8pt, arc=2pt, breakable=false,
+  left=8pt, right=8pt, top=7pt, bottom=7pt,
+  before skip=\medskipamount, after skip=\medskipamount
+}
+
+\definecolor{ybframe}{HTML}{B8860B}
+\definecolor{ybback}{HTML}{FDF6E3}
+\newtcolorbox{yellowbox}{
+  colback=ybback, colframe=ybframe, coltitle=ybframe,
+  boxrule=0.8pt, arc=2pt, breakable=false,
+  left=8pt, right=8pt, top=7pt, bottom=7pt,
+  before skip=\medskipamount, after skip=\medskipamount
+}
+
+% ---- maze diagrams -----------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta}
+\tikzset{
+  room/.style   ={draw, rounded corners=2pt, minimum width=12mm,
+                  minimum height=8mm, align=center, font=\small\bfseries},
+  occ/.style    ={font=\scriptsize\mdseries},
+}
+\newcommand{\occfont}{\scriptsize\mdseries}
+\tikzset{
+  openway/.style={draw, line width=0.6pt},
+  guarded/.style={draw, line width=1.8pt},
+  glab/.style   ={midway, fill=white, inner sep=1.5pt, font=\scriptsize\itshape},
+  vlab/.style   ={font=\scriptsize}
+}
+
+% ---- dependency charts (Chart 1 relics, Chart 2 secrets) ---------------
+\usetikzlibrary{fit,backgrounds}
+\definecolor{chgoal}{HTML}{8B2500}   % the goal / the desire at the root
+\definecolor{chrelic}{HTML}{B8860B}  % relics and materials
+\definecolor{chsec}{HTML}{2C5AA0}    % secrets
+\definecolor{chdoor}{HTML}{4A4A4A}   % doors
+\definecolor{chmud}{HTML}{5B7C3F}    % mud: what you carry in from 0.A
+
+\tikzset{
+  dnode/.style ={draw, rounded corners=2pt, align=center, inner sep=3.5pt,
+                 text width=24mm, minimum height=9mm, font=\dnfont,
+                 line width=0.7pt},
+  goalN/.style ={dnode, draw=chgoal,  fill=chgoal!7,  text=black},
+  relicN/.style={dnode, draw=chrelic, fill=chrelic!12},
+  secN/.style  ={dnode, draw=chsec,   fill=chsec!8},
+  doorN/.style ={dnode, draw=chdoor,  fill=chdoor!7},
+  matN/.style  ={dnode, draw=chrelic, fill=chrelic!5, densely dashed},
+  mudN/.style  ={dnode, draw=chmud,   fill=chmud!10, rounded corners=6pt},
+  dep/.style   ={-{Latex[length=1.8mm]}, line width=0.6pt, draw=chdoor},
+  depalt/.style={-{Latex[length=1.8mm]}, line width=0.6pt, draw=chdoor,
+                 densely dashed},
+  elab/.style  ={font=\tiny\itshape, fill=white, inner sep=1.2pt},
+}
+% chart nodes break at spaces, never mid-word: a hyphenated EMEGIR is unreadable
+\newcommand{\dnfont}{\scriptsize\hyphenpenalty=10000 \exhyphenpenalty=10000 \relax}
+% node id + level tag, e.g. \nid{R1}{L2}
+\newcommand{\nid}[2]{\textbf{#1}\,{\tiny\textsc{#2}}\\[1pt]}
+\newcommand{\nsub}[1]{\\[1pt]{\tiny\itshape #1}}

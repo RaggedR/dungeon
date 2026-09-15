@@ -1,0 +1,11 @@
+# Runtime server logs and pids written by ./play and the *.server.ts processes
+.run/
+
+# LaTeX build logs (tectonic)
+*.log
+*.aux
+*.out
+*.toc
+
+.DS_Store
+**/.DS_Store

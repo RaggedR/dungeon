@@ -1,0 +1,8 @@
+#!/bin/bash
+# The player is a container too, so it needs the same permissions any other node
+# in this tower needs: --allow-run is what lets `delegate()` spawn the CLI hop
+# that carries a prompt to the next socket.  Without it the game starts, prints
+# the opening, and dies on the first delegation.
+exec deno run --quiet \
+  --allow-net --allow-env --allow-read --allow-run \
+  "$(dirname "$0")/play.ts" "$@"
