@@ -29,9 +29,19 @@ export interface Memory {
   told: Set<Secret>;
   asked: Set<string>;
   curious: number;
+  /** A verbatim record of what has actually passed between this inhabitant and
+   *  the party, oldest first — one line per exchange.  The stub does not use it
+   *  (it reasons from `asked`/`told`/`curious` instead); it is here because the
+   *  CLAUDE leaf needs it.  A `claude -p` call is stateless, so a condition that
+   *  is historical — "have they now asked me about all five signs?" — is
+   *  unanswerable unless the monster's own memory of the conversation is threaded
+   *  back into each call.  This is the monster's store, the dual of the player's
+   *  transcript, and the reason M0 can know the fifth question completes the five. */
+  history: string[];
 }
 
-export const mkMemory = (): Memory => ({ told: new Set(), asked: new Set(), curious: 0 });
+export const mkMemory = (): Memory =>
+  ({ told: new Set(), asked: new Set(), curious: 0, history: [] });
 
 const desiresOf = (id: MonsterId) => DESIRES.filter((d) => d.who === id);
 

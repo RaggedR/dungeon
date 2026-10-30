@@ -152,6 +152,24 @@ Deno.test("the party may refuse, and walking out empty is not a loss", async () 
   );
 });
 
+Deno.test("looking in an occupied room reads the wall and does not throw", async () => {
+  // `round = look x standing x move` builds a prompt for every side before one
+  // is chosen.  A Look is answered on the look side, so the monster prompts are
+  // never sent — but they must still be BUILT, and an earlier engine asked
+  // `promptFor` to translate the Look into monster speech and threw.  No
+  // scripted game had ever looked in a room with somebody in it; an agent on the
+  // player seam did, in 3.C, and found it.  0.A always has Nabonidus standing on
+  // the trapdoor, so a Look there is the smallest reproduction.
+  const g = mkGame();
+  const log: string[] = [];
+  const out = await play(g, scripted([look(), { tag: "Quit" }], log));
+  assertEquals(out.exit, "quit");
+  assert(
+    log.some((l) => l.includes("temple court")),
+    "the look returned 0.A's description",
+  );
+});
+
 Deno.test("a monster cannot conjure a bargain the table does not license", async () => {
   const g = mkGame();
   // M11 wants clay.  Offer it an empty pair of hands and no door opens, however

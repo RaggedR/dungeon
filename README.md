@@ -44,6 +44,11 @@ deno run -A smoke.ts        # the same game over the sockets
 ./up.sh --agent             # sixteen inhabitants, answered by claude
 deno run -A rejection-rate.ts   # what the decoder costs, as a number
 deno run -A adversarial.ts      # three things a monster may not do
+
+./play --agent --local      # a model plays the PARTY, against stub inhabitants
+./up.sh --agent && ./play --agent    # a model plays, against model inhabitants
+deno run -A reconcile.ts    # cross the two logs: every move has a reason (0 alarms)
+deno run -A reconcile.ts --agent     # the same crossing, over a live agent game
 ```
 
 ## Playing it
@@ -88,6 +93,46 @@ them.
     l  read the room again
     q  walk out
 ```
+
+## The agent plays it
+
+It has. In one recorded run against the sixteen `claude` inhabitants — no map, no
+answer key — a model playing the party brought the Foundation Tablet up to the
+daylight in **81 moves**: it found the curiosity that opens the trapdoor, carried
+secrets down and across the levels in its own prose, told the vault-keeper two of
+them in its own words, traded for the Tablet, and chose which of the three to
+leave behind. A turn-by-turn field recording of that run — the agent's moves, its
+reasons, and the inhabitants' replies, all verbatim — is here:
+
+**[Learning to Read the Wall](https://claude.ai/code/artifact/89adf476-5a22-4a14-9e7c-f0725f05545e)**
+
+The front ends above are a human at a keyboard. `--agent` is the other kind of
+player: a model behind the same seam, the exact dual of the `claude` behind each
+inhabitant. A monster is a leaf that answers `Ask/Tell/Offer`; the party is a
+leaf that answers `Choose` with a move. Same tower, same decoder discipline —
+a reply that does not decode throws, and the turn is counted against its cause.
+
+It is handed no table and no list of secrets, because it must not have one. A
+sorted, searchable record of every sentence you have heard *is* the table filled
+in for you, and discovering the table is how the game is won. So the agent's only
+notebook is its own transcript, replayed whole into each call: the secrets live
+in that prose exactly as they would in a human's head, unindexed. Two things it
+is never shown make the discovery honest — the clean list of a room's signs (it
+sees the **bold** words in the description, like a human, and must notice them
+itself) and anything naming a desire or a price. The sandbox that keeps the
+sixteen inhabitants from reading each other's files does a second job here: the
+player process is scoped to `player/`, which holds nothing but how-to-play, so it
+**cannot read `spec.ts` or `secrets.ts`** — it cannot see the answer key it is
+down there to find.
+
+Watching it is the point, so it narrates. Every move carries one line of *why*,
+and that line is the half of the story the ship's log cannot keep: `trace.ts`
+records the move and the tool, never the reason, which is formed in the leaf and
+never crosses the wire. `reconcile.ts` crosses the two — the ship's log (WHAT)
+against the intent log (WHY) — and reports two things: an **alarm** (a move with
+no reason behind it, which must never happen) and the **blocked** moves the world
+refused, which are legible *only* in the WHY log, because a refused trade and an
+accepted one look identical in the audit. `PLAN-agent.md` is the full account.
 
 ## What the game is
 

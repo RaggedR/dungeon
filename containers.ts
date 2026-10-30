@@ -52,10 +52,26 @@ export interface OfferR { readonly prose: string; readonly traded: boolean }
  *  So `to` is the minimum the tensor forces, and it is the only field this
  *  implementation adds to the spec's prompts.  Everyone still hears the words;
  *  `answered` is still each monster's own to decide. */
+/** What an inhabitant can perceive of the world around it, over and above the
+ *  words spoken to it — the dual of the player's `Sees`.  The player never
+ *  believes a false thing about the world because it is handed `sees.ways[].shut`
+ *  every turn; a monster, handed only words, used to have nothing to correct its
+ *  story against, and so could come to believe it had opened a way it had not and
+ *  never fire the tool again.  This is the one perception that matters: the state
+ *  of the way this inhabitant guards.  It is NOT part of the response contract —
+ *  the reply a monster owes (`AskR`/`TellR`/`OfferR`) is unchanged — it is ambient
+ *  input, like the depth that rides in a header, and it rides on the prompt only
+ *  because vendored `delegate()` hands back the body and nothing else. */
+export interface Perceives {
+  /** true if this inhabitant stands at a way that is currently shut; false if it
+   *  guards a way that is now open; absent if it guards nothing. */
+  readonly guardedWayShut?: boolean;
+}
+
 export type MonsterC =
-  | Fib<{ tag: "Ask"; to: MonsterId; words: string }, AskR>
-  | Fib<{ tag: "Tell"; to: MonsterId; words: string }, TellR>
-  | Fib<{ tag: "Offer"; to: MonsterId; held: readonly Item[] }, OfferR>;
+  | Fib<{ tag: "Ask"; to: MonsterId; words: string; perceives?: Perceives }, AskR>
+  | Fib<{ tag: "Tell"; to: MonsterId; words: string; perceives?: Perceives }, TellR>
+  | Fib<{ tag: "Offer"; to: MonsterId; held: readonly Item[]; perceives?: Perceives }, OfferR>;
 
 export type MonsterPrompt = MonsterC extends Fib<infer S, unknown> ? S : never;
 

@@ -24,14 +24,32 @@ import { LEVEL_PORT, PLAYER_PORT } from "./ports.ts";
 import { mkGame, play as playLocal } from "./harness.ts";
 import { emph, out, readLine, wrap } from "./term.ts";
 import { menuDecide } from "./menu.ts";
+import { agentDriver } from "./player-claude.ts";
+import { intentHook, mkIntentLog, realClock } from "./intent-log.ts";
 
 const LOCAL = Deno.args.includes("--local");
 
-/** Two front ends over the same container.  The menu offers everything the
+/** THREE front ends over the same container.  The menu offers everything the
  *  player could see for free and types everything they had to learn; the parser
- *  types all of it.  `menu.ts` explains where that line is and why it is there. */
+ *  types all of it; the agent is a model playing the party, a leaf of this tower
+ *  exactly as a monster is.  `menu.ts` explains where the menu's line is drawn;
+ *  `player-claude.ts` explains why the agent is handed prose and never a table.
+ *
+ *  The agent is always a live run — it answers through `claude` (or groq) — so
+ *  its intent-log is stamped with a REAL clock.  A live audit under a fixed
+ *  clock would be a false audit, which is the thing reconciliation exists to
+ *  catch; `--agent` therefore never touches `fixedClock`. */
 const TYPED = Deno.args.includes("--type");
-const decide = (sees: Sees): Promise<Move> => TYPED ? parseDecide(sees) : menuDecide(sees);
+const AGENT = Deno.args.includes("--agent");
+
+const decide: (sees: Sees) => Promise<Move> = AGENT
+  ? ((agent) => (sees: Sees) => agent.choose(sees))(
+    agentDriver({
+      onDecision: intentHook(mkIntentLog({ path: "player-intent.jsonl", clock: realClock })),
+      maxTurns: Number(Deno.env.get("LABYRINTH_MAX_TURNS") ?? "200"),
+    }),
+  )
+  : (sees: Sees) => TYPED ? parseDecide(sees) : menuDecide(sees);
 
 // ── who is that ───────────────────────────────────────────────────────
 /** A name, a nickname or an id.  "Ask Shara what mu means" and "ask m8 what mu
