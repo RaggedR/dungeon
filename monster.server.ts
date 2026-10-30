@@ -32,16 +32,26 @@ const struck = new Map<string, number>();
 
 const LEAF = Deno.env.get("LABYRINTH_LEAF") ?? "stub";
 
+/** The inhabitant's ambient perception, if the level sent any.  Not part of the
+ *  response contract — it is the dual of the player's `sees` — so it is read
+ *  leniently and simply passed through to the leaf. */
+const perceivesOf = (u: Record<string, unknown>): { guardedWayShut?: boolean } | undefined => {
+  const pc = u.perceives;
+  if (!isRecord(pc)) return undefined;
+  return typeof pc.guardedWayShut === "boolean" ? { guardedWayShut: pc.guardedWayShut } : {};
+};
+
 const parse = (u: unknown): MonsterPrompt | null => {
   if (!isRecord(u) || !isStr(u.tag) || !isStr(u.to)) return null;
+  const perceives = perceivesOf(u);
   if (u.tag === "Ask" || u.tag === "Tell") {
     return isStr(u.words)
-      ? { tag: u.tag, to: u.to as MonsterId, words: u.words } as MonsterPrompt
+      ? { tag: u.tag, to: u.to as MonsterId, words: u.words, perceives } as MonsterPrompt
       : null;
   }
   if (u.tag === "Offer") {
     return Array.isArray(u.held) && u.held.every(isStr)
-      ? { tag: "Offer", to: u.to as MonsterId, held: u.held } as MonsterPrompt
+      ? { tag: "Offer", to: u.to as MonsterId, held: u.held, perceives } as MonsterPrompt
       : null;
   }
   return null;

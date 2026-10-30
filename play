@@ -3,6 +3,13 @@
 # in this tower needs: --allow-run is what lets `delegate()` spawn the CLI hop
 # that carries a prompt to the next socket.  Without it the game starts, prints
 # the opening, and dies on the first delegation.
+#
+# --allow-write is scoped to the one file `--agent` keeps: the intent-log, the
+# WHY half of the audit.  The menu and typed front ends write nothing; the agent
+# writes its reason for each move, write-ahead.  The scope is narrow on purpose,
+# and `intent-log.ts` degrades to memory-only if even this is withheld — the
+# audit must never be able to crash the game it audits.
 exec deno run --quiet \
   --allow-net --allow-env --allow-read --allow-run \
+  --allow-write=player-intent.jsonl,ships-log.jsonl \
   "$(dirname "$0")/play.ts" "$@"

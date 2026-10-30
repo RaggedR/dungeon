@@ -262,7 +262,35 @@ export async function runLevel(
     // looking, and speaking.  Both go through the round's product.
     const here = monstersIn(room);
     const standing = standingRunner(here.map(io.monster));
-    const prompts = here.map((id) => promptFor(id, move, p));
+    // Each inhabitant perceives the state of the way it guards, if any — the dual
+    // of the player's `sees.ways[].shut`.  This is what stops a chatty monster
+    // coming to believe it opened a way it has not and then never firing the tool
+    // again: every turn the world itself tells it the way is still shut.
+    const perceivesOf = (id: MonsterId): import("./containers.ts").Perceives => {
+      const w = WAYS.find((x) => x.guard === id);
+      if (!w) return {};
+      // A guard whose door opens only as the far side of a TRADE (M2: the vault
+      // opens in the same moment the Tablet is handed over) must NOT get the
+      // "the way you guard is shut — fire open_door" nudge, because for it
+      // open_door is the wrong tool and does nothing. The perception exists to
+      // correct a false belief about a door it opens directly; a tablet-giver
+      // opens no door directly, so it is told nothing about the way.
+      const opensByTrade = DESIRES.some((d) =>
+        d.who === id && d.gives.kind === "tablet"
+      );
+      if (opensByTrade) return {};
+      return { guardedWayShut: !st.doors.has(wayKey(w.from, w.to)) };
+    };
+    // `round = look x standing x move` builds a prompt for all three sides
+    // before one is chosen, but a Look is answered on the look side and the
+    // monster prompts are never sent.  They still have to EXIST, one per
+    // inhabitant, to satisfy the tensor's arity — so hand the unused speak side
+    // a placeholder rather than ask `promptFor` to translate a move that is not
+    // speech.  (Without this a Look in any occupied room throws, which no
+    // scripted game ever exercised but a typed player or an agent will.)
+    const prompts: MonsterPrompt[] = move.tag === "Look"
+      ? here.map((id) => ({ tag: "Ask", to: id, words: "", perceives: perceivesOf(id) }))
+      : here.map((id) => ({ ...promptFor(id, move, p), perceives: perceivesOf(id) }));
     const result = await runRound(standing, sees, prompts, move, depth);
 
     if (result.kind === "look") {

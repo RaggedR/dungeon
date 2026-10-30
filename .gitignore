@@ -1,6 +1,10 @@
 # Runtime server logs and pids written by ./play and the *.server.ts processes
 .run/
 
+# Per-run audit artifacts written by the agent player and reconcile.ts
+player-intent.jsonl
+ships-log.jsonl
+
 # LaTeX build logs (tectonic)
 *.log
 *.aux
